@@ -1,7 +1,7 @@
 <h2 align="center">Do It Yourself: Learning Semantic Correspondence from Pseudo-Labels</h2>
 <div align="center"> 
   <a href="https://odunkel.github.io" target="_blank">Olaf Dünkel</a>, 
-  <a href="ttps://wimmerth.github.io/" target="_blank">Thomas Wimmer</a>,
+  <a href="https://wimmerth.github.io/" target="_blank">Thomas Wimmer</a>,
   <a href="https://people.mpi-inf.mpg.de/~theobalt" target="_blank">Christian Theobalt</a>,
   <a href="https://chrirupp.github.io/" target="_blank">Christian Rupprecht</a>,
   <a href="https://genintel.mpi-inf.mpg.de/" target="_blank">Adam Kortylewski</a>
@@ -68,11 +68,11 @@ wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth -P ckp
 ```
 
 #### II) Full (SD+DINOv2)
-We refer to [GeoAware-SC](https://github.com/Junyi42/GeoAware-SC?tab=readme-ov-file#environment-setup) for the environment to install the requirements for computing the SD features.
+We refer to [GeoAware-SC](https://github.com/Junyi42/GeoAware-SC?tab=readme-ov-file#environment-setup) for the instructions to install the requirements for computing the SD features.
 
-### Preparing SPair-71K data
+### Preparing SPair-71k data
 
-Download SPair-71K (as in Geo-Aware) by running `bash scripts/download_spair.sh`.
+Download SPair-71k (as in Geo-Aware) by running `bash scripts/download_spair.sh`.
 
 Compute SAM masks with `bash scripts/compute_sam_masks.sh`.
 
@@ -85,7 +85,7 @@ Pre-compute the feature maps by running:
 
 
 ### Evaluation
-Pre-trained adapters can be evaluated on the SPair-71K test split via:
+Pre-trained adapters can be evaluated on the SPair-71k test split via:
 | Option                | Command                                                                 |
 |-------------------------|-----------------------------------------------------------------------------|
 | I) DINOv2 |`python pck_train.py --config configs/eval_spair.yaml --ONLY_DINO --LOAD ckpts/0300_dino_spair/best.pth`                              |
