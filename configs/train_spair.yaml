@@ -1,0 +1,12 @@
+NOTE: 'train_adpt'
+DENSE_OBJ: 1
+PAIR_AUGMENT: false
+TEST_SAMPLE: 200
+EPOCH: 20
+MAX_STEPS: 200_001
+SCHEDULER: "one_cycle"
+SOFT_EVAL: true
+COMPUTE_GEOAWARE_METRICS: false
+DATASET_DIR_SPAIR: 'data/SPair-71k/'
+DATASET_DIR_IN3D: 'data/IN3D/imagenet3d_0530'
+TRAIN_DATASET_ANN_DIR: 'data/pair_annotations/spair/v145'

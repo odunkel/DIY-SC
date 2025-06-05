@@ -1,0 +1,10 @@
+NOTE: 'eval_spair'
+DO_EVAL: true
+LOAD: 'ckpts/0280_spair/best.pth'
+SOFT_EVAL: true
+TEST_SAMPLE: 0
+COMPUTE_GEOAWARE_METRICS: false
+KPT_RESULT: true
+DATASET_DIR_SPAIR: 'data/SPair-71k/'
+DATASET_DIR_IN3D: 'data/IN3D/imagenet3d_0530'
+NOT_WANDB: true

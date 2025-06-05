@@ -1,0 +1,15 @@
+__pycache__
+*.o
+*.egg-info
+*.pt
+*.tar.gz
+*.npy
+*.zip
+*.log
+zip*
+ap-10k
+build
+.vscode
+.DS_Store
+SPair-71k
+wandb
