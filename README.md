@@ -11,6 +11,7 @@
 <br>
 
 [![Project Page](https://img.shields.io/badge/Project-Page-blue)](https://genintel.github.io/DIY-SC)
+[![Paper](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/pdf/2506.05312)
 [![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://16b7922078fe2cbf35.gradio.live/)
 
 ## 💡 DIY-SC for refining DINOv2 features
