@@ -12,7 +12,7 @@
 
 [![Project Page](https://img.shields.io/badge/Project-Page-blue)](https://genintel.github.io/DIY-SC)
 [![Paper](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/pdf/2506.05312)
-[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://16b7922078fe2cbf35.gradio.live/)
+[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://huggingface.co/spaces/odunkel/DIY-SC)
 
 ## 💡 DIY-SC for refining DINOv2 features
 DIY-SC improves semantic correspondence by refining foundational features, which has potential applications for tasks that require semantically aware features.
