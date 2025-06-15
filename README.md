@@ -12,7 +12,7 @@
 
 [![Project Page](https://img.shields.io/badge/Project-Page-blue)](https://genintel.github.io/DIY-SC)
 [![Paper](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/pdf/2506.05312)
-[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://891603b6c63d4e2e4f.gradio.live/)
+[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://a8a39377b85fb7a7f2.gradio.live/)
 
 ## 💡 DIY-SC for refining DINOv2 features
 DIY-SC improves semantic correspondence by refining foundational features, which has potential applications for tasks that require semantically aware features.
@@ -102,9 +102,8 @@ bash scripts/precompute_features.sh --sph
 ```
 Then, generate pseudo-labels for validation and training splits (with the `--only_dino` flag for the light-weight option I with only DINO).
 ```
-TRAIN_DATASET_ANN_DIR = 'data/pair_annotations/spair/v145'
-python gen_pseudo_labels.py --filter_sph --subsample 300 --split val --TRAIN_DATASET_ANN_DIR $TRAIN_DATASET_ANN_DIR
-python gen_pseudo_labels.py --filter_sph --subsample 30_000 --split trn --TRAIN_DATASET_ANN_DIR $TRAIN_DATASET_ANN_DIR
+python gen_pseudo_labels.py --filter_sph --subsample 300 --split val --dataset_version v01
+python gen_pseudo_labels.py --filter_sph --subsample 30000 --split trn --dataset_version v01
 ```
 
 ### Training
