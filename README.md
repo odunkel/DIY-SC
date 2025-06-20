@@ -51,6 +51,28 @@ with torch.no_grad():
 
 We show an examplary application in `demo_diy.py`.
 
+### Pytorch Hub loading
+For simple loading of the model, we also support the integration via Pytorch Hub: 
+```
+import torch
+aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino', pretrained=True)
+```
+
+<details>
+  <summary>We also support other pre-trained adapters via Pytorch Hub.</summary>
+  
+  ```bash
+  # adapter for SD+DINO features
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_sd_dino', pretrained=True)
+  # adapter for DINO features, projecting to 384 channels
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino_384', pretrained=True)
+  # adapter for DINO features, projecting to 128 channels
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino_128', pretrained=True)
+  ```
+
+</details> 
+
+
 ## 💡 Semantic correspondence on SPair-71k
 
 In the following, we evaluate DIY-SC on the semantic correspondence benchmark SPair-71k.
@@ -161,8 +183,6 @@ python pck_train.py --config configs/train_spair.yaml --EXP_ID 0
 ## Planned features
 The following features are currently planned or already in development:
 
-- [ ] `torchhub` integration
-- [ ] Checkpoints with varying feature dimensions
 - [ ] ImageNet-3D training functionality
 - [ ] OrientAnything integration and further scaling
 - [ ] LoftUp support
