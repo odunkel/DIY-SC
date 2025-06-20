@@ -72,7 +72,7 @@ class AggregationNetwork(nn.Module):
         num_params = 0
         for param in self.parameters():
             num_params += param.numel()
-        print(f"AggregationNetwork has {num_params} parameters.")
+        self.num_params = num_params
     
     def load_pretrained_weights(self, pretrained_dict):
         custom_dict = self.state_dict()

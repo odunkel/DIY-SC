@@ -420,7 +420,7 @@ def normalize_feats(feats, sd_and_dino=False, epsilon=1e-10):
     
     return norm_feats
 
-def load_features_and_masks(aggre_net, img_path, flip, ensemble, num_patches, device,img_dir,feature_dir,only_dino=False):
+def load_features_and_masks(aggre_net, img_path, flip, ensemble, num_patches, device,img_dir,feature_dir,only_dino=False,sd_path_suffix='_sd', dino_path_suffix='_dino'):
     # Construct feature paths
     f_img_ending = os.path.basename(img_path).split('.')[-1]
     if img_dir != '' and feature_dir != '':
@@ -429,8 +429,8 @@ def load_features_and_masks(aggre_net, img_path, flip, ensemble, num_patches, de
     suffix_flip = '_flip' if flip else ''
     ensemble_folder = f'features_ensemble{ensemble}' if ensemble > 1 else 'features'
     mask_path = f"{feature_base}_mask{suffix_flip}.png"
-    sd_path = f"{feature_base}_sd{suffix_flip}.pt".replace('features', ensemble_folder)
-    dino_path = f"{feature_base}_dino{suffix_flip}.pt".replace('features', ensemble_folder)
+    sd_path = f"{feature_base}{sd_path_suffix}{suffix_flip}.pt".replace('features', ensemble_folder)
+    dino_path = f"{feature_base}{dino_path_suffix}{suffix_flip}.pt".replace('features', ensemble_folder)
     desc_dino = torch.load(dino_path, map_location=device).to(device)
     if only_dino:
         if desc_dino.shape[-2:] != (num_patches, num_patches):

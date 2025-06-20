@@ -28,8 +28,8 @@ def get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, flip=Fa
     img_path_1 = files[pair_idx * 2]
     img_path_2 = files[pair_idx * 2 + 1]
     # save the imgs for cases if the feature doesn't exist
-    img1_desc, mask1 = load_features_and_masks(aggre_net, img_path_1, flip, args.ENSEMBLE, num_patches, device,img_dir=args.IMG_DIR,feature_dir=args.FEATURE_DIR, only_dino=args.ONLY_DINO)
-    img2_desc, mask2 = load_features_and_masks(aggre_net, img_path_2, flip2, args.ENSEMBLE, num_patches, device,img_dir=args.IMG_DIR,feature_dir=args.FEATURE_DIR, only_dino=args.ONLY_DINO)
+    img1_desc, mask1 = load_features_and_masks(aggre_net, img_path_1, flip, args.ENSEMBLE, num_patches, device,img_dir=args.IMG_DIR,feature_dir=args.FEATURE_DIR, only_dino=args.ONLY_DINO, sd_path_suffix=args.SD_PATH_SUFFIX, dino_path_suffix=args.DINO_PATH_SUFFIX)
+    img2_desc, mask2 = load_features_and_masks(aggre_net, img_path_2, flip2, args.ENSEMBLE, num_patches, device,img_dir=args.IMG_DIR,feature_dir=args.FEATURE_DIR, only_dino=args.ONLY_DINO, sd_path_suffix=args.SD_PATH_SUFFIX, dino_path_suffix=args.DINO_PATH_SUFFIX)
     
     # normalize the desc
     img1_desc = normalize_feats(img1_desc[0], sd_and_dino=args.DUMMY_NET and not args.ONLY_DINO)
@@ -87,7 +87,7 @@ def compute_pck(args, save_path, aggre_net, files, kps, category=None, used_poin
         vis2 = img2_kps[:, 2]
         # Get patch descriptors
         with torch.no_grad():
-            img1_desc, img2_desc, mask1, mask2 = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, img1=img1, img2=img2)
+            img1_desc, img2_desc, mask1, mask2 = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, img1=img1, img2=img2, device=device)
         # Get patch index for the keypoints
         img1_patch_idx = kpts_to_patch_idx(args, img1_kps, num_patches)
         # Get similarity matrix
@@ -95,7 +95,7 @@ def compute_pck(args, save_path, aggre_net, files, kps, category=None, used_poin
 
         if args.ADAPT_FLIP:
             img1_flip = img1.transpose(Image.FLIP_LEFT_RIGHT)
-            img1_desc_flip, _, mask1_flip, _ = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, flip=True, img1=img1.transpose(Image.FLIP_LEFT_RIGHT), img2=img2)
+            img1_desc_flip, _, mask1_flip, _ = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, flip=True, img1=img1.transpose(Image.FLIP_LEFT_RIGHT), img2=img2, device=device)
             img1_kps_flip = flip_keypoints(img1_kps, args.ANNO_SIZE, permute_indices(permute_list, vis))
             img1_patch_idx_flip = kpts_to_patch_idx(args, img1_kps_flip, num_patches)
             kps_1_to_2_flip = calculate_keypoint_transformation(args, img1_desc_flip, img2_desc, img1_patch_idx_flip, num_patches)
@@ -240,11 +240,14 @@ def train(args, aggre_net, corr_map_net, optimizer, scheduler, logger, save_path
     best_val_loss = 1e10
     if not args.NOT_VAL: best_val_loss = 10
     i_step = 0
+    stop_training = False
     for epoch in range(args.EPOCH):
+        if stop_training: break
         pbar.reset()
         for j in range(0, N, args.BZ):
             if j + epoch * N >= args.MAX_STEPS:
                 logger.info(f'Stopping after {i_step} steps and {j + epoch * N} samples.')
+                stop_training = True
                 break
             optimizer.zero_grad()
             batch_loss = 0  # collect the loss for each batch
@@ -253,9 +256,9 @@ def train(args, aggre_net, corr_map_net, optimizer, scheduler, logger, save_path
                 img1, img1_kps = load_img_and_kps(idx=2*pair_idx, files=files, kps=kps, edge=False)
                 img2, img2_kps = load_img_and_kps(idx=2*pair_idx+1, files=files, kps=kps, edge=False)
                 # Get patch descriptors/feature maps
-                img1_desc, img2_desc, mask1, mask2 = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, img1=img1, img2=img2)
+                img1_desc, img2_desc, mask1, mask2 = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, img1=img1, img2=img2, device=device)
                 if args.ADAPT_FLIP > 0 or args.AUGMENT_SELF_FLIP > 0 or args.AUGMENT_DOUBLE_FLIP > 0:  # augment with flip
-                    img1_desc_flip, img2_desc_flip, _, _ = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, flip=True, flip2=True, img1=img1.transpose(Image.FLIP_LEFT_RIGHT), img2=img2.transpose(Image.FLIP_LEFT_RIGHT))
+                    img1_desc_flip, img2_desc_flip, _, _ = get_patch_descriptors(args, aggre_net, num_patches, files, pair_idx, flip=True, flip2=True, img1=img1.transpose(Image.FLIP_LEFT_RIGHT), img2=img2.transpose(Image.FLIP_LEFT_RIGHT), device=device)
                     raw_permute_list = AP10K_FLIP if args.TRAIN_DATASET == 'ap10k' else SPAIR_FLIP_TRN[files[pair_idx * 2].split('/')[-2]]
                 else:
                     img1_desc_flip = img2_desc_flip = raw_permute_list = None
@@ -335,9 +338,9 @@ def perform_eval(args, aggre_net,corr_map_net):
             img1, img1_kps = load_img_and_kps(idx=2*pair_idx, files=files, kps=kps, edge=False)
             img2, img2_kps = load_img_and_kps(idx=2*pair_idx+1, files=files, kps=kps, edge=False)
             # Get patch descriptors/feature maps
-            img1_desc, img2_desc, mask1, mask2 = get_patch_descriptors(args, aggre_net, args.NUM_PATCHES, files, pair_idx, img1=img1, img2=img2)
+            img1_desc, img2_desc, mask1, mask2 = get_patch_descriptors(args, aggre_net, args.NUM_PATCHES, files, pair_idx, img1=img1, img2=img2, device=device)
             if args.ADAPT_FLIP > 0 or args.AUGMENT_SELF_FLIP > 0 or args.AUGMENT_DOUBLE_FLIP > 0:  # augment with flip
-                img1_desc_flip, img2_desc_flip, _, _ = get_patch_descriptors(args, aggre_net, args.NUM_PATCHES, files, pair_idx, flip=True, flip2=True, img1=img1.transpose(Image.FLIP_LEFT_RIGHT), img2=img2.transpose(Image.FLIP_LEFT_RIGHT))
+                img1_desc_flip, img2_desc_flip, _, _ = get_patch_descriptors(args, aggre_net, args.NUM_PATCHES, files, pair_idx, flip=True, flip2=True, img1=img1.transpose(Image.FLIP_LEFT_RIGHT), img2=img2.transpose(Image.FLIP_LEFT_RIGHT), device=device)
                 raw_permute_list = AP10K_FLIP if args.TRAIN_DATASET == 'ap10k' else SPAIR_FLIP_TRN[files[pair_idx * 2].split('/')[-2]]
             else:
                 img1_desc_flip = img2_desc_flip = raw_permute_list = None
@@ -461,7 +464,7 @@ def main(args):
 
         if args.LOAD is not None:
             if os.path.exists(args.LOAD): 
-                pretrained_dict = torch.load(args.LOAD)
+                pretrained_dict = torch.load(args.LOAD, map_location=device)
                 aggre_net.load_pretrained_weights(pretrained_dict)
                 logger.info(f'Load model from {args.LOAD}')
             elif (not args.DO_EVAL) and (not os.path.exists(args.LOAD)): 
@@ -542,10 +545,12 @@ if __name__ == '__main__':
     parser.add_argument('--TRAIN_DATASET_ANN_DIR', type=str, default='')            # Dir of pseudo-label annotations
     parser.add_argument('--IMG_DIR', type=str, default='')                          # directory of images (if not standard)
     parser.add_argument('--FEATURE_DIR', type=str, default='')                      # directory of features (if not standard)
-    parser.add_argument('--DATASET_DIR_PF_PASCAL', type=str, default='data/PF-dataset-PASCAL')    # 
-    parser.add_argument('--DATASET_DIR_AP10K', type=str, default='data/ap-10k')        # 
-    parser.add_argument('--DATASET_DIR_SPAIR', type=str, default='data/SPair-71k')        # 
-    parser.add_argument('--DATASET_DIR_IN3D', type=str, default='data/IN3D')                 # 
+    parser.add_argument('--DATASET_DIR_PF_PASCAL', type=str, default='data/PF-dataset-PASCAL')    # dataset directory for PF-Pascal
+    parser.add_argument('--DATASET_DIR_AP10K', type=str, default='data/ap-10k')     # dataset directory for AP10k
+    parser.add_argument('--DATASET_DIR_SPAIR', type=str, default='data/SPair-71k')  # dataset directory for SPair-71k
+    parser.add_argument('--DATASET_DIR_IN3D', type=str, default='data/IN3D')        # dataset directory for IN3D
+    parser.add_argument('--DINO_PATH_SUFFIX', type=str, default='_dino')            # suffix for the dino feature path
+    parser.add_argument('--SD_PATH_SUFFIX', type=str, default='_sd')                # suffix for the sd feature path
 
     # training model setup
     parser.add_argument('--LOAD', type=str, default=None)                           # path to load the pretrained model

@@ -15,7 +15,7 @@ def set_seed(seed=42):
     np.random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
 
-def process_and_save_features(file_paths, sd_size, dino_size, layer, facet, model, aug, extractor_vit, num_ensemble, flip=False, do_sd=False, do_dino=False,add_str=''):
+def process_and_save_features(file_paths, sd_size, dino_size, layer, facet, model, aug, extractor_vit, num_ensemble, flip=False, do_sd=False, do_dino=False,add_str='',sd_post_fix='_sd', dino_post_fix='_dino'):
     ii = 0
     for file_path in tqdm(file_paths, desc="Processing images (Flip: {})".format(flip)):
         
@@ -24,8 +24,8 @@ def process_and_save_features(file_paths, sd_size, dino_size, layer, facet, mode
         os.makedirs(output_subdir, exist_ok=True)
         
         suffix = f'{add_str}_flip' if flip else f'{add_str}'
-        output_path_dino = os.path.join(output_subdir, os.path.splitext(os.path.basename(file_path))[0] + f'_dino{suffix}.pt')
-        output_path = os.path.join(output_subdir, os.path.splitext(os.path.basename(file_path))[0] + f'_sd{suffix}.pt')
+        output_path_dino = os.path.join(output_subdir, os.path.splitext(os.path.basename(file_path))[0] + f'{dino_post_fix}{suffix}.pt')
+        output_path = os.path.join(output_subdir, os.path.splitext(os.path.basename(file_path))[0] + f'{sd_post_fix}{suffix}.pt')
 
         ii += 1
         img1 = Image.open(file_path).convert('RGB')
@@ -35,6 +35,9 @@ def process_and_save_features(file_paths, sd_size, dino_size, layer, facet, mode
         img1 = resize(img1, dino_size, resize=True, to_pil=True)
 
         if do_sd:
+            if os.path.exists(output_path):
+                print(f"File {output_path} already exists. Skipping computing SD features.")
+                continue
             accumulated_features = {}
             for _ in range(num_ensemble): 
                 features1 = process_features_and_mask(model, aug, img1_input, mask=False, raw=True)
@@ -53,10 +56,12 @@ def process_and_save_features(file_paths, sd_size, dino_size, layer, facet, mode
                 print(f"Error saving SD features of {file_path}")
 
         if do_dino:
+            if os.path.exists(output_path_dino):
+                print(f"File {output_path_dino} already exists. Skipping computing DINO features.")
+                continue
             img1_batch = extractor_vit.preprocess_pil(img1)
             with torch.no_grad():
                 img1_desc_dino = extractor_vit.extract_descriptors(img1_batch.cuda(), layer, facet).permute(0, 1, 3, 2).reshape(1, -1, 60, 60)
-            
             os.makedirs(os.path.dirname(output_path_dino), exist_ok=True)
             try:
                 torch.save(img1_desc_dino, output_path_dino)
@@ -76,6 +81,9 @@ if __name__ == '__main__':
     parser.add_argument('--layer', type=int, default=11, help='DINOv2 layer for feature extraction.')
     parser.add_argument('--facet', type=str, default='token', help='Facet for feature extraction.')
     parser.add_argument('--num_ensemble', type=int, default=1, help='Number of ensembles for SD processing.')
+    parser.add_argument('--dino_model', type=str, default='dinov2_vitb14', help='DINO model.')
+    parser.add_argument('--sd_path_suffix', type=str, default='_sd', help='Str for SD feature paths.')
+    parser.add_argument('--dino_path_suffix', type=str, default='_dino', help='Str for DINO feature paths.')
     args = parser.parse_args()
 
     set_seed()
@@ -91,10 +99,10 @@ if __name__ == '__main__':
         model, aug = load_model(diffusion_ver='v1-5', image_size=args.sd_size, num_timesteps=50, block_indices=[2, 5, 8, 11])
     if args.dino: 
         from model_utils.extractor_dino import ViTExtractor
-        extractor_vit = ViTExtractor('dinov2_vitb14', 14, device='cuda')
+        extractor_vit = ViTExtractor(args.dino_model, 14, device='cuda')
 
     try:
-        process_and_save_features(all_files, args.sd_size, args.dino_size, args.layer, args.facet, model, aug, extractor_vit, args.num_ensemble, flip=args.do_flip, do_dino=args.dino, do_sd=args.sd,add_str='')
+        process_and_save_features(all_files, args.sd_size, args.dino_size, args.layer, args.facet, model, aug, extractor_vit, args.num_ensemble, flip=args.do_flip, do_dino=args.dino, do_sd=args.sd,add_str='', sd_post_fix=args.sd_path_suffix, dino_post_fix=args.dino_path_suffix)
     except KeyboardInterrupt:
         print("\nProcessing interrupted by user.")
     
