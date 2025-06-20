@@ -6,17 +6,24 @@
   <a href="https://chrirupp.github.io/" target="_blank">Christian Rupprecht</a>,
   <a href="https://genintel.mpi-inf.mpg.de/" target="_blank">Adam Kortylewski</a>
 </div>
-
-
 <br>
+
+<div align="center">
 
 [![Project Page](https://img.shields.io/badge/Project-Page-blue)](https://genintel.github.io/DIY-SC)
 [![Paper](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/pdf/2506.05312)
-[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://79b8ef5fce4679f373.gradio.live/)
+[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://1818f68943928de8cc.gradio.live/)
+
+</div>
+
+
+
+DIY-SC enhances semantic correspondence by refining foundational features in a pose-aware manner. This approach is not limited to SPair-71k and can be adapted to other tasks requiring robust feature matching.
+
+Below, we first demonstrate how DIY-SC can be seamlessly integrated into existing codebases, for example as a drop-in replacement for DINOv2 features. We then outline the procedures for SPair-71k evaluation, pseudo-label generation, and model training.
+
 
 ## 💡 DIY-SC for refining DINOv2 features
-DIY-SC improves semantic correspondence by refining foundational features, which has potential applications for tasks that require semantically aware features.
-In the following, we present how DIY-SC can be integrated straightforwardly in existing code bases, e.g., as an alternative to DINOv2.
 
 ### 🛠️ Setup 
 While the adapter only requires `torch`, the demonstration below requires the following:
@@ -78,33 +85,72 @@ Download SPair-71k (as in Geo-Aware) by running `bash scripts/download_spair.sh`
 Compute SAM masks with `bash scripts/compute_sam_masks.sh`.
 
 Pre-compute the feature maps by running:
-| Option                | Command                                                                 |
-|-------------------------|-----------------------------------------------------------------------------|
-| I) DINOv2 |`bash scripts/precompute_features.sh --dino`                              |
-| II) SD+DINOv2     | `bash scripts/precompute_features.sh --dino --sd` |
 
+```bash
+bash scripts/precompute_features.sh --dino
+  ```
+
+<details>
+  <summary>Show the command for preparing option II) SD+DINOv2</summary>
+  
+  ```bash
+  bash scripts/precompute_features.sh --dino --sd
+  ```
+
+</details> 
 
 
 ### Evaluation
 Pre-trained adapters can be evaluated on the SPair-71k test split via:
-| Option                | Command                                                                 |
-|-------------------------|-----------------------------------------------------------------------------|
-| I) DINOv2 |`python pck_train.py --config configs/eval_spair.yaml --ONLY_DINO --LOAD ckpts/0300_dino_spair/best.pth`                              |
-| II) SD+DINOv2     | `python pck_train.py --config configs/eval_spair.yaml --LOAD ckpts/0280_spair/best.pth` |
+  
+```bash
+python pck_train.py --config configs/eval_spair.yaml --ONLY_DINO --LOAD ckpts/0300_dino_spair/best.pth
+```
+
+
+<details>
+  <summary>Show the command for evaluating option II) SD+DINOv2</summary>
+  
+  ```bash
+  python pck_train.py --config configs/eval_spair.yaml --EXP_ID 0 --LOAD ckpts/0280_spair/best.pth
+  ```
+
+</details> 
+
 
 ### Generation of pseudo-labels
-We provide generated pseudo-labels on [GDrive](https://drive.google.com/drive/folders/1nGjNsWpqbcqUJS-fNXU_41pMBMdE42Je?usp=sharing). Download them to `data`.
+We provide generated pseudo-labels on [Google Drive](https://drive.google.com/drive/folders/1nGjNsWpqbcqUJS-fNXU_41pMBMdE42Je?usp=sharing). To download them, you can use the [`gdown`](https://github.com/wkentaro/gdown) tool:
 
-Alternatively, to generate pseudo-labels, perform the following steps.
+```bash
+pip install gdown
+gdown --folder https://drive.google.com/drive/folders/1nGjNsWpqbcqUJS-fNXU_41pMBMdE42Je?usp=sharing -O data
+```
+This will download all pseudo-label files into the `data` directory.
+
+
+Alternatively, to generate pseudo-labels yourself, perform the following steps.
 First, compute the spherical points:
 ```
 bash scripts/precompute_features.sh --sph
 ```
-Then, generate pseudo-labels for validation and training splits (with the `--only_dino` flag for the light-weight option I with only DINO).
+Then, generate pseudo-labels for validation and training splits:
+
+  
+```bash
+python gen_pseudo_labels.py --filter_sph --subsample 300 --split val --dataset_version v01 --only_dino
+python gen_pseudo_labels.py --filter_sph --subsample 30000 --split trn --dataset_version v01 --only_dino
 ```
-python gen_pseudo_labels.py --filter_sph --subsample 300 --split val --dataset_version v01
-python gen_pseudo_labels.py --filter_sph --subsample 30000 --split trn --dataset_version v01
-```
+
+
+<details>
+  <summary>Show the command for generation pseudo-labels with option II) SD+DINOv2</summary>
+  
+  ```bash
+  python gen_pseudo_labels.py --filter_sph --subsample 300 --split val --dataset_version v01
+  python gen_pseudo_labels.py --filter_sph --subsample 30000 --split trn --dataset_version v01
+  ```
+
+</details> 
 
 ### Training
 Finally, the refinement adapter is trained via:
@@ -138,4 +184,9 @@ If you find our work useful, please cite:
 ## Acknowledgement
 We thank [GeoAware-SC](https://github.com/Junyi42/GeoAware-SC) and [SphericalMaps](https://github.com/VICO-UoE/SphericalMaps) for open-sourcing their great works.
 
+<details>
+  <summary>Licensing information for GeoAware-SC.</summary>
+  
+Our code partially builds on the GeoAware-SC repo. However, it does not contain licensing information, making the licensing state of all the code taken from it unclear.
 
+</details>
