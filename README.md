@@ -12,7 +12,7 @@
 
 [![Project Page](https://img.shields.io/badge/Project-Page-blue)](https://genintel.github.io/DIY-SC)
 [![Paper](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/pdf/2506.05312)
-[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://2f4def5ec23df2abd9.gradio.live/)
+[![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue)](https://huggingface.co/spaces/odunkel/DIY-SC)
 
 </div>
 
@@ -50,6 +50,7 @@ with torch.no_grad():
 ```
 
 We show an examplary application in `demo_diy.py`.
+Additionally, we provide an interactive notebook in `DIY-SC/notebooks/correspondence_demo.ipynb`.
 
 ### Pytorch Hub loading
 For simple loading of the model, we also support the integration via Pytorch Hub: 
@@ -184,8 +185,8 @@ python pck_train.py --config configs/train_spair.yaml --EXP_ID 0
 The following features are currently planned or already in development:
 
 - [ ] ImageNet-3D training functionality
-- [ ] OrientAnything integration and further scaling
-- [ ] LoftUp support
+- [ ] OrientAnything integration
+- [ ] Feature upsampling support
 
 **Contributions welcome**: If you have feature suggestions or would like to help implement any of the above, feel free to open an issue or submit a pull request.
 
@@ -193,11 +194,11 @@ The following features are currently planned or already in development:
 If you find our work useful, please cite:
 
 ```bibtex
-@misc{duenkel2025diysc,
-    title = {Do It Yourself: Learning Semantic Correspondence from Pseudo-Labels},
-    author = {D{\"u}nkel, Olaf and Wimmer, Thomas and Theobalt, Christian and Rupprecht, Christian and Kortylewski, Adam},
-    booktitle = {arXiv},
-    year = {2025},
+@article{duenkel2025diysc,
+  title={{Do It Yourself: Learning Semantic Correspondence from Pseudo-Labels}},
+  author={D{\"u}nkel, Olaf and Wimmer, Thomas and Theobalt, Christian and Rupprecht, Christian and Kortylewski, Adam},
+  journal={arXiv preprint arXiv:2506.05312},
+  year={2025}
 }
 ```
 
