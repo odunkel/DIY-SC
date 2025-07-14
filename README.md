@@ -63,11 +63,22 @@ aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino', pretrained=Tru
   <summary>We also support other pre-trained adapters via Pytorch Hub.</summary>
   
   ```bash
-  # adapter for SD+DINO features
+  # adapter for SD+DINO features (SPair-71k trained)
   aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_sd_dino', pretrained=True)
-  # adapter for DINO features, projecting to 384 channels
+  # adapter for SD+DINO features (ImageNet-3D trained)
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_sd_dino_in3d', pretrained=True)
+  # adapter for SD+DINO features (ImageNet-3D trained, fine-tuned on SPair-71k)
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_sd_dino_in3d_spair', pretrained=True)
+
+  # adapter for DINO features (SPair-71k trained)
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino', pretrained=True)
+  # adapter for DINO features (ImageNet-3D trained)
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino_in3d', pretrained=True)
+  # adapter for DINO features (ImageNet-3D trained, fine-tuned on SPair-71k)
+  aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino_in3d_spair', pretrained=True)
+  # adapter for DINO features, projecting to 384 channels (SPair-71k trained)
   aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino_384', pretrained=True)
-  # adapter for DINO features, projecting to 128 channels
+  # adapter for DINO features, projecting to 128 channels (SPair-71k trained)
   aggre_net = torch.hub.load('odunkel/DIY-SC-torchhub', 'agg_dino_128', pretrained=True)
   ```
 
@@ -140,6 +151,8 @@ python pck_train.py --config configs/eval_spair.yaml --ONLY_DINO --LOAD ckpts/03
 
 </details> 
 
+We refer to notebook `notebooks/agg_spair_results.ipynb` for loading sample-specific results and computing SPair-71k evaluation metrics.
+
 
 ### Generation of pseudo-labels
 We provide generated pseudo-labels on [Google Drive](https://drive.google.com/drive/folders/1nGjNsWpqbcqUJS-fNXU_41pMBMdE42Je?usp=sharing). To download them, you can use the [`gdown`](https://github.com/wkentaro/gdown) tool:
@@ -191,7 +204,7 @@ The following features are currently planned or already in development:
 **Contributions welcome**: If you have feature suggestions or would like to help implement any of the above, feel free to open an issue or submit a pull request.
 
 ## 🎓 Citation
-If you find our work useful, please cite:
+If you find our work useful, please consider giving a star ⭐ and a citation.
 
 ```bibtex
 @article{duenkel2025diysc,
